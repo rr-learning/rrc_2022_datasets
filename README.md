@@ -12,6 +12,8 @@ pip install -e .
 
 ## Usage
 
+### Loading the dataset
+
 The datasets are accessible via gym environments which are automatically registered when importing the package. They are automatically downloaded when requested and stored in `~/.rrc_2022_datasets` as HDF5 files.
 
 The datasets are named following the pattern `trifinger-cube-task-source-quality-v0` where `task` is either `push` or `lift`, `source` is either `sim` or `real` and `quality` can be either `mixed` or `expert`.
@@ -62,3 +64,7 @@ Alternatively, the observations can be obtained as nested dictionaries. This sim
     )
 ```
 To transform the observation back to a flat array after filtering, simply set the keyword argument `flatten_obs` to true. Note that the step and reset functions will transform observations in the same manner as the `get_dataset` method to ensure compatibility. A downside of working with observations in the form of dictionaries is that they cause a considerable memory overhead during dataset loading.
+
+### Evaluating a policy
+
+Code that mimics the evaluation on the real robot is provided in `scripts/evaluate_policy_sim.py`. Make sure to replace the policy with your own code and to use the right environment parameters.

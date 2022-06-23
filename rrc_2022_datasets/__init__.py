@@ -1,6 +1,8 @@
 from gym.envs.registration import register
 
 from .dataset_env import TriFingerDatasetEnv
+from .evaluation import Evaluation
+from .policy_base import PolicyBase
 
 
 dataset_params = [
