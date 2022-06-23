@@ -67,7 +67,7 @@ class Evaluation:
             ep_stats = self.run_episode(initial_obs, initial_info, policy)
             ep_stats_list.append(ep_stats)
             # move fingers to initial position and wait until cube has settled down
-            initial_obs = self.env.sim_env.reset_fingers(self._reset_time)
+            self.env.reset_fingers(self._reset_time)
             if i < n_episodes - 1:
                 # retrieve cube from barrier and center it approximately
                 self.env.sim_env.reset_cube()
@@ -75,7 +75,7 @@ class Evaluation:
             # TODO: Should we use fixed goals here like for the evaluation for the paper?
             self.env.sim_env.sample_new_goal()
             # move fingers to initial position and wait until cube has settled down
-            initial_obs = self.env.sim_env.reset_fingers(self._reset_time)
+            initial_obs = self.env.reset_fingers(self._reset_time)
 
         overall_stats = {}
         for k in ep_stats_list[0]:

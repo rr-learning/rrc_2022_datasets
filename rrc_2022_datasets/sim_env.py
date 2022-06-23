@@ -371,8 +371,7 @@ class SimTriFingerCubeEnv(gym.Env):
     def reset_fingers(
         self,
         reset_wait_time: int = 3000,
-        return_info: bool = False,
-        return_tracking_variance: bool = False,
+        return_info: bool = False
     ):
         """Reset fingers to initial position.
 
@@ -386,24 +385,15 @@ class SimTriFingerCubeEnv(gym.Env):
         action = self.platform.Action(position=self._initial_finger_position)
         for i in range(reset_wait_time):
             t = self._append_desired_action(action)
-            if return_tracking_variance:
-                obs, info = self._create_observation(t, self._initial_action)
-                object_positions.append(obs["object_observation"]["position"])
-                object_orientations.append(obs["object_observation"]["orientation"])
         self.t_obs = t
         # reset step_count even though this is not a full reset
         self.step_count = 0
         # block until reset wait time has passed and return observation
         obs, info = self._create_observation(t, self._initial_action)
-        rvals = [obs]
         if return_info:
-            rvals.append(info)
-        if return_tracking_variance:
-            position_var = np.var(object_positions, axis=0)
-            orientation_var = np.var(object_orientations, axis=0)
-            tracking_var = {"position": position_var, "orientation": orientation_var}
-            rvals.append(tracking_var)
-        return tuple(rvals)
+            return obs, info
+        else:
+            return obs
 
     def sample_new_goal(self, goal=None):
         """Sample a new desired goal."""

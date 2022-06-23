@@ -163,7 +163,6 @@ class TriFingerDatasetEnv(gym.Env):
         if self.flatten_obs and isinstance(obs, dict):
             # flatten obs
             obs = gym.spaces.flatten(self._filtered_obs_space, obs)
-            #obs = obs.astype(self.observation_space.dtype)
         if self.scale_obs:
             # scale obs
             obs = self._scale_obs(obs)
@@ -243,9 +242,9 @@ class TriFingerDatasetEnv(gym.Env):
     def step(
         self, action: np.ndarray, **kwargs
     ) -> Tuple[Union[Dict, np.ndarray], float, bool, Dict]:
-        obs, rew, done, info = self.sim_env.step(action, **kwargs)
         if self.real_robot:
             raise NotImplementedError("The step method is not available for real-robot data.")
+        obs, rew, done, info = self.sim_env.step(action, **kwargs)
         # process obs
         processed_obs = self._process_obs(obs)
         return processed_obs, rew, done, info
@@ -253,9 +252,9 @@ class TriFingerDatasetEnv(gym.Env):
     def reset(
         self, return_info: bool = False
     ) -> Union[Union[Dict, np.ndarray], Tuple[Union[Dict, np.ndarray], Dict]]:
-        rvals = self.sim_env.reset(return_info)
         if self.real_robot:
             raise NotImplementedError("The reset method is not available for real-robot data.")
+        rvals = self.sim_env.reset(return_info)
         if return_info:
             obs, info = rvals
         else:
@@ -274,3 +273,22 @@ class TriFingerDatasetEnv(gym.Env):
         if self.real_robot:
             raise NotImplementedError("The render method is not available for real-robot data.")
         self.sim_env.render()
+
+    def reset_fingers(
+        self,
+        reset_wait_time: int = 3000,
+        return_info: bool = False
+    ):
+        if self.real_robot:
+            raise NotImplementedError("The reset_fingers method is not available for real-robot data.")
+        rvals = self.sim_env.reset_fingers(reset_wait_time, return_info)
+        if return_info:
+            obs, info = rvals
+        else:
+            obs = rvals
+        # process obs
+        processed_obs = self._process_obs(obs)
+        if return_info:
+            return processed_obs, info
+        else:
+            return processed_obs
