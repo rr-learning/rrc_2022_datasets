@@ -21,7 +21,11 @@ import gym
 
 import trifinger_datasets
 
-env = gym.make("trifinger-cube-push-sim-expert-v0")
+env = gym.make(
+    "trifinger-cube-push-sim-expert-v0",
+    disable_env_checker=True,
+    visualization=True,  # enable visualization
+)
 
 dataset = env.get_dataset()
 
