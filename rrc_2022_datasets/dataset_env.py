@@ -160,7 +160,7 @@ class TriFingerDatasetEnv(gym.Env):
             # filter obs
             if self.obs_to_keep is not None:
                 obs = self._filter_dict(self.obs_to_keep, obs)
-        if self.flatten_obs and self.obs_to_keep is not None:
+        if self.flatten_obs and isinstance(obs, dict):
             # flatten obs
             obs = gym.spaces.flatten(self._filtered_obs_space, obs)
             #obs = obs.astype(self.observation_space.dtype)
