@@ -18,9 +18,7 @@ if __name__ == "__main__":
     assert dataset["actions"].shape[0] == n_transitions
     assert dataset["rewards"].shape[0] == n_transitions
 
-    print("First observation: ")
-    for k, v in dataset["observations"][0].items():
-        print(f"{k}: {v}")
+    print("First observation: ", dataset["observations"][0])
 
     obs = env.reset()
     done = False

@@ -4,12 +4,12 @@ from typing import Union, Tuple, Dict, Optional, List
 import urllib.request
 
 import gym
+import gym.spaces
 import h5py
 import numpy as np
 from tqdm import tqdm
 
 from .sim_env import SimTriFingerCubeEnv
-from .spaces import space_from_gym_space
 
 
 def download_dataset(url, name):
@@ -39,7 +39,7 @@ class TriFingerDatasetEnv(gym.Env):
         trifinger_kwargs,
         visualization=None,
         obs_to_keep=None,
-        flatten_obs=False,
+        flatten_obs=True,
         scale_obs=False,
         set_terminals=True,
         **kwargs,
@@ -100,15 +100,8 @@ class TriFingerDatasetEnv(gym.Env):
         else:
             self._filtered_obs_space = self.sim_env.observation_space
         if self.flatten_obs:
-            # get space object that can automatically flatten
-            # observations
-            self._auto_obs_space = space_from_gym_space(
-                self._filtered_obs_space
-            )
             # flat obs space
-            self.observation_space = (
-                self._auto_obs_space.get_flat_space().get_gym_space()
-            )
+            self.observation_space = gym.spaces.flatten_space(self._filtered_obs_space)
             if self.scale_obs:
                 self._obs_unscaled_low = self.observation_space.low
                 self._obs_unscaled_high = self.observation_space.high
@@ -163,16 +156,16 @@ class TriFingerDatasetEnv(gym.Env):
             # filter obs
             if self.obs_to_keep is not None:
                 obs = self._filter_dict(self.obs_to_keep, obs)
-        if self.flatten_obs:
+        if self.flatten_obs and self.obs_to_keep is not None:
             # flatten obs
-            obs = self._auto_obs_space.flatten_value(obs)
-            obs = obs.astype(self.observation_space.dtype)
+            obs = gym.spaces.flatten(self._filtered_obs_space, obs)
+            #obs = obs.astype(self.observation_space.dtype)
         if self.scale_obs:
             # scale obs
             obs = self._scale_obs(obs)
         return obs
 
-    def get_dataset(self, h5path=None, flat_obs=False, clip=True):
+    def get_dataset(self, h5path=None, clip=True):
         if h5path is None:
             h5path = download_dataset(self.dataset_url, self.name)
 
@@ -185,21 +178,22 @@ class TriFingerDatasetEnv(gym.Env):
 
         # clip to make sure that there are no outliers in the data
         if clip:
-            orig_auto_obs_space = space_from_gym_space(self._orig_obs_space)
-            orig_flat_obs_space = orig_auto_obs_space.get_flat_space().get_gym_space()
+            orig_flat_obs_space = gym.spaces.flatten_space(self._orig_obs_space)
             data_dict["observations"] = data_dict["observations"].clip(
                 min=orig_flat_obs_space.low,
                 max=orig_flat_obs_space.high,
                 dtype=orig_flat_obs_space.dtype,
             )
 
-        if not flat_obs:
+        if not (self.flatten_obs and self.obs_to_keep is None):
             # unflatten observations, i.e., turn them into dicts again
-            orig_auto_obs_space = space_from_gym_space(self._orig_obs_space)
             unflattened_obs = []
             obs = data_dict["observations"]
             for i in range(obs.shape[0]):
-                unflattened_obs.append(orig_auto_obs_space.unflatten_value(obs[i, ...]))
+                print("unflattening")
+                unflattened_obs.append(
+                    gym.spaces.unflatten(self.sim_env.observation_space, obs[i, ...])
+                )
             data_dict["observations"] = unflattened_obs
 
         # reconstruct terminals and provide trivial timeouts and infos

@@ -39,6 +39,7 @@ if __name__ == "__main__":
     }
     env = gym.make(
         args.env_name,
+        disable_env_checker=True,
         # enable visualization,
         visualization=True,
         # filter out observations,
