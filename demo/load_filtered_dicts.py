@@ -6,7 +6,7 @@ import rrc_2022_datasets  # noqa
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Demonstrate how to customize observation space."
+        description="Demonstrate how to customize observation space by filtering."
     )
     parser.add_argument(
         "--env_name",
@@ -17,12 +17,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--do_not_filter_obs",
         action="store_true",
-        help="Do not filter observation if this is set.",
+        help="Do not filter observations if this is set.",
     )
     parser.add_argument(
-        "--do_not_flatten_obs",
+        "--flatten_obs",
         action="store_true",
-        help="Do not flatten observation if this is set.",
+        help="Flatten observations again after filtering if this is set.",
     )
     args = parser.parse_args()
 
@@ -42,10 +42,10 @@ if __name__ == "__main__":
         disable_env_checker=True,
         # enable visualization,
         visualization=True,
-        # filter out observations,
+        # filter observations,
         obs_to_keep=None if args.do_not_filter_obs else obs_to_keep,
         # flatten observation
-        flatten_obs=False if args.do_not_flatten_obs else True,
+        flatten_obs=args.flatten_obs,
     )
 
     dataset = env.get_dataset()

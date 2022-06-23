@@ -37,11 +37,12 @@ class TriFingerDatasetEnv(gym.Env):
         ref_max_score,
         ref_min_score,
         trifinger_kwargs,
+        real_robot=False,
         visualization=None,
         obs_to_keep=None,
         flatten_obs=True,
         scale_obs=False,
-        set_terminals=True,
+        set_terminals=False,
         **kwargs,
     ):
         """Args:
@@ -51,6 +52,8 @@ class TriFingerDatasetEnv(gym.Env):
             ref_min_score (float): Minimum score (for score normalization)
             trifinger_kwargs (dict): Keyword arguments for underlying
                 SimTriFingerCubeEnv environment.
+            real_robot (bool): Whether the data was collected on real 
+                robots.
             visualization (bool): Enables rendering for simulated
                 environment.
             obs_to_keep (dict): Dictionary with the same structure as
@@ -76,6 +79,7 @@ class TriFingerDatasetEnv(gym.Env):
         self.dataset_url = dataset_url
         self.ref_max_score = ref_max_score
         self.ref_min_score = ref_min_score
+        self.real_robot = real_robot
         self.obs_to_keep = obs_to_keep
         self.flatten_obs = flatten_obs
         self.scale_obs = scale_obs
@@ -190,21 +194,19 @@ class TriFingerDatasetEnv(gym.Env):
             unflattened_obs = []
             obs = data_dict["observations"]
             for i in range(obs.shape[0]):
-                print("unflattening")
                 unflattened_obs.append(
                     gym.spaces.unflatten(self.sim_env.observation_space, obs[i, ...])
                 )
             data_dict["observations"] = unflattened_obs
 
-        # reconstruct terminals and provide trivial timeouts and infos
+        # timeouts, terminals and info
         episode_ends = data_dict["episode_ends"]
-        terminals = np.zeros(n_transitions, dtype=bool)
+        data_dict["timeouts"] = np.zeros(n_transitions, dtype=bool)
+        if not self.set_terminals:
+            data_dict["timeouts"][episode_ends] = True
+        data_dict["terminals"] = np.zeros(n_transitions, dtype=bool)
         if self.set_terminals:
-            terminals[episode_ends] = True
-        data_dict["terminals"] = terminals
-        # TODO: The timeouts should be zero because otherwise d3rl will
-        # overwrite the terminals with zeros.
-        data_dict["timeouts"] = terminals
+            data_dict["terminals"][episode_ends] = True
         data_dict["infos"] = [{} for _ in range(n_transitions)]
 
         # process obs (filtering, flattening, scaling)
@@ -221,7 +223,7 @@ class TriFingerDatasetEnv(gym.Env):
         return data_dict
 
     def get_dataset_chunk(self, chunk_id, h5path=None):
-        return NotImplementedError()
+        raise NotImplementedError()
 
     def compute_reward(
         self, achieved_goal: dict, desired_goal: dict, info: dict
@@ -242,6 +244,8 @@ class TriFingerDatasetEnv(gym.Env):
         self, action: np.ndarray, **kwargs
     ) -> Tuple[Union[Dict, np.ndarray], float, bool, Dict]:
         obs, rew, done, info = self.sim_env.step(action, **kwargs)
+        if self.real_robot:
+            raise NotImplementedError("The step method is not available for real-robot data.")
         # process obs
         processed_obs = self._process_obs(obs)
         return processed_obs, rew, done, info
@@ -250,6 +254,8 @@ class TriFingerDatasetEnv(gym.Env):
         self, return_info: bool = False
     ) -> Union[Union[Dict, np.ndarray], Tuple[Union[Dict, np.ndarray], Dict]]:
         rvals = self.sim_env.reset(return_info)
+        if self.real_robot:
+            raise NotImplementedError("The reset method is not available for real-robot data.")
         if return_info:
             obs, info = rvals
         else:
@@ -265,4 +271,6 @@ class TriFingerDatasetEnv(gym.Env):
         return self.sim_env.seed(seed)
 
     def render(self, mode: str = "human"):
+        if self.real_robot:
+            raise NotImplementedError("The render method is not available for real-robot data.")
         self.sim_env.render()
