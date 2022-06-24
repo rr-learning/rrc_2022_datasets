@@ -1,4 +1,6 @@
+*~
 *.swp
 *.egg-info
 *.pyc
 pycache/
+build/
