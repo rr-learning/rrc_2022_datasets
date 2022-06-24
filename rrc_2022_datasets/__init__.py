@@ -13,7 +13,9 @@ dataset_params = [
     # push-expert
     {
         "name": "trifinger-cube-push-sim-expert-v0",
-        "dataset_url": "https://owncloud.tuebingen.mpg.de/index.php/s/XKcRys7JLPTyaqx/download",
+        "dataset_url": (
+            "https://owncloud.tuebingen.mpg.de/index.php/s/XKcRys7JLPTyaqx/download"
+        ),
         "ref_min_score": 0.0,
         "ref_max_score": 1.0 * 15000 / 20,
         "real_robot": False,
@@ -35,3 +37,6 @@ def get_env(**kwargs):
 
 for params in dataset_params:
     register(id=params["name"], entry_point="rrc_2022_datasets:get_env", kwargs=params)
+
+
+__all__ = ("TriFingerDatasetEnv", "Evaluation", "PolicyBase", "get_env")
