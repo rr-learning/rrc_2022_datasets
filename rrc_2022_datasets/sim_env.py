@@ -125,7 +125,7 @@ class SimTriFingerCubeEnv(gym.Env):
         robot_id_space = gym.spaces.Box(low=0, high=20, shape=(1,), dtype=np.int_)
 
         # object pose
-        object_obs_space_dict = {
+        object_obs_space_dict: Dict[str, gym.Space] = {
             "position": gym.spaces.Box(
                 low=trifingerpro_limits.object_position.low,
                 high=trifingerpro_limits.object_position.high,
@@ -188,6 +188,7 @@ class SimTriFingerCubeEnv(gym.Env):
         )
 
         self._old_object_obs: Optional[Dict[str, Any]] = None
+        self.t_obs: int = 0
 
         # TODO: Remove this after updating gym
         self._np_random = None
