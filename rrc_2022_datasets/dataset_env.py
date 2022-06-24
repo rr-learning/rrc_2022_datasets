@@ -278,7 +278,7 @@ class TriFingerDatasetEnv(gym.Env):
             raise NotImplementedError(
                 "The render method is not available for real-robot data."
             )
-        self.sim_env.render()
+        self.sim_env.render(mode)
 
     def reset_fingers(self, reset_wait_time: int = 3000, return_info: bool = False):
         if self.real_robot:
