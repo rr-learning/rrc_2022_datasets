@@ -1,6 +1,9 @@
 from time import time
+import typing
 
 import numpy as np
+
+from .policy_base import PolicyBase
 
 
 class Evaluation:
@@ -11,7 +14,9 @@ class Evaluation:
         self.env = env
         self.time_policy = time_policy
 
-    def run_episode(self, initial_obs, initial_info, policy):
+    def run_episode(
+        self, initial_obs: dict, initial_info: dict, policy: PolicyBase
+    ) -> typing.Dict[str, typing.Union[int, float]]:
         """Run one episode/do one rollout."""
 
         obs = initial_obs
@@ -21,6 +26,8 @@ class Evaluation:
         ep_return = 0.0
         max_reward = 0.0
         transient_success = False
+
+        policy.reset()
 
         while True:
             if self.time_policy:
