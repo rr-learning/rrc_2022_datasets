@@ -7,7 +7,8 @@ This repository provides offline reinforcement learning datasets collected on th
 To install the package run with python 3.8 in the root directory of the repository (we recommend doing this in a virtual environment):
 
 ```bash
-pip install -e .
+pip install --upgrade pip  # make sure recent version of pip is installed
+pip install .
 ```
 
 ## Usage
