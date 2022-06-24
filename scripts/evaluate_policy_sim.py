@@ -4,8 +4,8 @@ import json
 
 from rrc_2022_datasets import Evaluation, PolicyBase
 
-class RandomPolicy(PolicyBase):
 
+class RandomPolicy(PolicyBase):
     def __init__(self, action_space):
         self.action_space = action_space
 
@@ -40,7 +40,7 @@ if __name__ == "__main__":
         args.env_name,
         disable_env_checker=True,
         # enable visualization,
-        visualization=args.visualization
+        visualization=args.visualization,
     )
     random_policy = RandomPolicy(env.action_space)
 
@@ -51,4 +51,3 @@ if __name__ == "__main__":
     )
     print("Evaluation result: ")
     print(json.dumps(eval_res, indent=4))
-    

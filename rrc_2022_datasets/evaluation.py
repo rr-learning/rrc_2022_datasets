@@ -18,8 +18,8 @@ class Evaluation:
         info = initial_info
         n_steps = 0
         momentary_successes = 0
-        ep_return = 0.
-        max_reward = 0.
+        ep_return = 0.0
+        max_reward = 0.0
         transient_success = False
         if self.time_policy:
             time1 = time()
@@ -46,10 +46,10 @@ class Evaluation:
 
         ep_stats = {
             "success_rate": int(info["has_achieved"]),
-            "mean_momentary_success": momentary_successes/n_steps,
+            "mean_momentary_success": momentary_successes / n_steps,
             "transient_success_rate": int(transient_success),
             "return": ep_return,
-            "max_reward": max_reward
+            "max_reward": max_reward,
         }
         return ep_stats
 

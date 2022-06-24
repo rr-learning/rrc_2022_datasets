@@ -368,11 +368,7 @@ class SimTriFingerCubeEnv(gym.Env):
         else:
             return obs
 
-    def reset_fingers(
-        self,
-        reset_wait_time: int = 3000,
-        return_info: bool = False
-    ):
+    def reset_fingers(self, reset_wait_time: int = 3000, return_info: bool = False):
         """Reset fingers to initial position.
 
         This resets neither the frontend nor the cube. This method is
@@ -527,6 +523,6 @@ class SimTriFingerCubeEnv(gym.Env):
     def reset_cube(self):
         """Replay a recorded trajectory to move cube to center of arena."""
 
-        for position in self._cube_reset_traj[: self._reset_trajectory_length: 2]:
+        for position in self._cube_reset_traj[: self._reset_trajectory_length : 2]:
             robot_action = self.platform.Action(position=position)
             self._append_desired_action(robot_action)

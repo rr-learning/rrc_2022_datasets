@@ -46,26 +46,26 @@ class TriFingerDatasetEnv(gym.Env):
         **kwargs,
     ):
         """Args:
-            name (str): Name of the dataset.
-            dataset_url (str): URL pointing to the dataset.
-            ref_max_score (float): Maximum score (for score normalization)
-            ref_min_score (float): Minimum score (for score normalization)
-            trifinger_kwargs (dict): Keyword arguments for underlying
-                SimTriFingerCubeEnv environment.
-            real_robot (bool): Whether the data was collected on real 
-                robots.
-            visualization (bool): Enables rendering for simulated
-                environment.
-            obs_to_keep (dict): Dictionary with the same structure as
-                the observation of SimTriFingerCubeEnv. The boolean
-                value of each item indicates whether it should be
-                included in the observation. If None, the
-                SimTriFingerCubeEnv is used.
-            flatten_obs (bool): Whether to flatten the observation. Can
-                be combined with obs_to_keep.
-            scale_obs (bool): Whether to scale all components of the
-                observation to interval [-1, 1]. Only implemented
-                for flattend observations.
+        name (str): Name of the dataset.
+        dataset_url (str): URL pointing to the dataset.
+        ref_max_score (float): Maximum score (for score normalization)
+        ref_min_score (float): Minimum score (for score normalization)
+        trifinger_kwargs (dict): Keyword arguments for underlying
+            SimTriFingerCubeEnv environment.
+        real_robot (bool): Whether the data was collected on real
+            robots.
+        visualization (bool): Enables rendering for simulated
+            environment.
+        obs_to_keep (dict): Dictionary with the same structure as
+            the observation of SimTriFingerCubeEnv. The boolean
+            value of each item indicates whether it should be
+            included in the observation. If None, the
+            SimTriFingerCubeEnv is used.
+        flatten_obs (bool): Whether to flatten the observation. Can
+            be combined with obs_to_keep.
+        scale_obs (bool): Whether to scale all components of the
+            observation to interval [-1, 1]. Only implemented
+            for flattend observations.
         """
         super().__init__(**kwargs)
         t_kwargs = deepcopy(trifinger_kwargs)
@@ -243,7 +243,9 @@ class TriFingerDatasetEnv(gym.Env):
         self, action: np.ndarray, **kwargs
     ) -> Tuple[Union[Dict, np.ndarray], float, bool, Dict]:
         if self.real_robot:
-            raise NotImplementedError("The step method is not available for real-robot data.")
+            raise NotImplementedError(
+                "The step method is not available for real-robot data."
+            )
         obs, rew, done, info = self.sim_env.step(action, **kwargs)
         # process obs
         processed_obs = self._process_obs(obs)
@@ -253,7 +255,9 @@ class TriFingerDatasetEnv(gym.Env):
         self, return_info: bool = False
     ) -> Union[Union[Dict, np.ndarray], Tuple[Union[Dict, np.ndarray], Dict]]:
         if self.real_robot:
-            raise NotImplementedError("The reset method is not available for real-robot data.")
+            raise NotImplementedError(
+                "The reset method is not available for real-robot data."
+            )
         rvals = self.sim_env.reset(return_info)
         if return_info:
             obs, info = rvals
@@ -271,16 +275,16 @@ class TriFingerDatasetEnv(gym.Env):
 
     def render(self, mode: str = "human"):
         if self.real_robot:
-            raise NotImplementedError("The render method is not available for real-robot data.")
+            raise NotImplementedError(
+                "The render method is not available for real-robot data."
+            )
         self.sim_env.render()
 
-    def reset_fingers(
-        self,
-        reset_wait_time: int = 3000,
-        return_info: bool = False
-    ):
+    def reset_fingers(self, reset_wait_time: int = 3000, return_info: bool = False):
         if self.real_robot:
-            raise NotImplementedError("The reset_fingers method is not available for real-robot data.")
+            raise NotImplementedError(
+                "The reset_fingers method is not available for real-robot data."
+            )
         rvals = self.sim_env.reset_fingers(reset_wait_time, return_info)
         if return_info:
             obs, info = rvals
