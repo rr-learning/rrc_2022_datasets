@@ -16,6 +16,7 @@ setup(
         "offline reinforcement learning", "TriFinger", "Real Robot Challenge", "dexterous manipulation"
     ],
     packages=find_packages(),
+    package_data={"": ["*.npy"]},
     install_requires=[
         "numpy", "gym", "h5py", "tqdm", "numpy-quaternion", "trifinger_simulation"
     ]
