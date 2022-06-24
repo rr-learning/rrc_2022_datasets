@@ -416,6 +416,12 @@ class SimTriFingerCubeEnv(gym.Env):
                 goal["orientation"], dtype=np.float32
             )
 
+        # update goal visualisation
+        if self.visualization:
+            self.goal_marker.set_state(
+                self.active_goal.position, self.active_goal.orientation
+            )
+
     # TODO: This is a workaround to be compatible with gym 0.18
     @property
     def np_random(self) -> np.random.Generator:
