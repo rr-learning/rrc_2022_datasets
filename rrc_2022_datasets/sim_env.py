@@ -187,6 +187,8 @@ class SimTriFingerCubeEnv(gym.Env):
             }
         )
 
+        self._old_object_obs: Optional[Dict[str, Any]] = None
+
         # TODO: Remove this after updating gym
         self._np_random = None
 
@@ -474,7 +476,7 @@ class SimTriFingerCubeEnv(gym.Env):
                 object_observation
             )
 
-        if hasattr(self, "_old_object_obs"):
+        if self._old_object_obs is not None:
             # handle quaternion flipping
             q_sum = (
                 self._old_object_obs["orientation"]
