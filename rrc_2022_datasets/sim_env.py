@@ -190,9 +190,6 @@ class SimTriFingerCubeEnv(gym.Env):
         self._old_object_obs: Optional[Dict[str, Any]] = None
         self.t_obs: int = 0
 
-        # TODO: Remove this after updating gym
-        self._np_random = None
-
     def _kernel_reward(
         self, achieved_goal: np.ndarray, desired_goal: np.ndarray
     ) -> float:
@@ -424,17 +421,6 @@ class SimTriFingerCubeEnv(gym.Env):
             self.goal_marker.set_state(
                 self.active_goal.position, self.active_goal.orientation
             )
-
-    # TODO: This is a workaround to be compatible with gym 0.18
-    @property
-    def np_random(self) -> np.random.Generator:
-        """
-        Returns the environment's internal :attr:`_np_random` that if not set will
-        initialise with a random seed.
-        """
-        if self._np_random is None:
-            self._np_random = np.random.default_rng()
-        return self._np_random
 
     def _get_pose_delay(self, camera_observation, t):
         """Get delay between when the object pose was captured and now."""
