@@ -45,27 +45,28 @@ class TriFingerDatasetEnv(gym.Env):
         set_terminals=False,
         **kwargs,
     ):
-        """Args:
-        name (str): Name of the dataset.
-        dataset_url (str): URL pointing to the dataset.
-        ref_max_score (float): Maximum score (for score normalization)
-        ref_min_score (float): Minimum score (for score normalization)
-        trifinger_kwargs (dict): Keyword arguments for underlying
-            SimTriFingerCubeEnv environment.
-        real_robot (bool): Whether the data was collected on real
-            robots.
-        visualization (bool): Enables rendering for simulated
-            environment.
-        obs_to_keep (dict): Dictionary with the same structure as
-            the observation of SimTriFingerCubeEnv. The boolean
-            value of each item indicates whether it should be
-            included in the observation. If None, the
-            SimTriFingerCubeEnv is used.
-        flatten_obs (bool): Whether to flatten the observation. Can
-            be combined with obs_to_keep.
-        scale_obs (bool): Whether to scale all components of the
-            observation to interval [-1, 1]. Only implemented
-            for flattend observations.
+        """
+        Args:
+            name (str): Name of the dataset.
+            dataset_url (str): URL pointing to the dataset.
+            ref_max_score (float): Maximum score (for score normalization)
+            ref_min_score (float): Minimum score (for score normalization)
+            trifinger_kwargs (dict): Keyword arguments for underlying
+                SimTriFingerCubeEnv environment.
+            real_robot (bool): Whether the data was collected on real
+                robots.
+            visualization (bool): Enables rendering for simulated
+                environment.
+            obs_to_keep (dict): Dictionary with the same structure as
+                the observation of SimTriFingerCubeEnv. The boolean
+                value of each item indicates whether it should be
+                included in the observation. If None, the
+                SimTriFingerCubeEnv is used.
+            flatten_obs (bool): Whether to flatten the observation. Can
+                be combined with obs_to_keep.
+            scale_obs (bool): Whether to scale all components of the
+                observation to interval [-1, 1]. Only implemented
+                for flattend observations.
         """
         super().__init__(**kwargs)
         t_kwargs = deepcopy(trifinger_kwargs)
