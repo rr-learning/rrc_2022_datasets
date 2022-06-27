@@ -4,14 +4,20 @@ from abc import ABC, abstractmethod
 import gym
 import numpy as np
 
+ObservationType = typing.Union[np.ndarray, typing.Dict[str, typing.Any]]
+
 
 class PolicyBase(ABC):
     """Base class defining interface for policies."""
 
-    def __init__(self, action_space: gym.Space):
+    def __init__(
+        self, action_space: gym.Space, observation_space: gym.Space, episode_length: int
+    ):
         """
         Args:
             action_space:  Action space of the environment.
+            observation_space:  Observation space of the environment.
+            episode_length:  Number of steps in one episode.
         """
         pass
 
@@ -20,7 +26,7 @@ class PolicyBase(ABC):
         pass
 
     @abstractmethod
-    def get_action(self, observation: typing.Dict[str, str]) -> np.ndarray:
+    def get_action(self, observation: ObservationType) -> np.ndarray:
         """Returns action that is executed on the robot.
 
         Args:
