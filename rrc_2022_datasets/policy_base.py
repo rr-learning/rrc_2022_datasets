@@ -37,7 +37,7 @@ class PolicyBase(ABC):
         """Returns action that is executed on the robot.
 
         Args:
-            Observation of the current time step.
+            observation: Observation of the current time step.
 
         Returns:
             Action that is sent to the robot.
