@@ -21,6 +21,13 @@ class PolicyBase(ABC):
         """
         pass
 
+    @staticmethod
+    def is_using_flattened_observations() -> bool:
+        """True if the policy expects observations as flattened arrays, False if it
+        expects them as dictionaries.
+        """
+        return True
+
     def reset(self) -> None:
         """Will be called at the beginning of each episode."""
         pass
