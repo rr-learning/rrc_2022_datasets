@@ -1,5 +1,5 @@
 from time import sleep, time
-from typing import Tuple
+from typing import Tuple, Dict, Any, Optional
 import os
 
 import gym
@@ -15,7 +15,9 @@ from .utils import to_quat, get_keypoints_from_pose
 
 
 class SimTriFingerCubeEnv(gym.Env):
-    """Gym environment for simulated manipulation of a cube with a TriFingerPro platform."""
+    """
+    Gym environment for simulated manipulation of a cube with a TriFingerPro platform.
+    """
 
     _initial_finger_position = [0.0, 0.9, -2.0] * 3
     _max_fingertip_vel = 5.0
@@ -38,7 +40,7 @@ class SimTriFingerCubeEnv(gym.Env):
         visualization: bool = False,
         real_time: bool = True,
     ):
-        """Initialize.
+        """
         Args:
             episode_length (int): How often step will run before done is True.
             keypoint_obs (bool): Whether to give keypoint observations for
@@ -47,7 +49,7 @@ class SimTriFingerCubeEnv(gym.Env):
                 and application of the action computed from this
                 observation in milliseconds.
             reward_type (str): Which reward to use. Can be 'dense' or 'sparse'.
-            visualization (bool): If true, the pyBullet GUI is run for
+            visualization (bool): If true, the PyBullet GUI is run for
                 visualization.
             real_time (bool): If true, the environment is stepped in real
                 time instead of as fast as possible.
@@ -61,7 +63,7 @@ class SimTriFingerCubeEnv(gym.Env):
             action has to be smaller than step size (20 ms)."
 
         # will be initialized in reset()
-        self.platform = None
+        self.platform: Optional[trifinger_simulation.TriFingerPlatform] = None
 
         self.episode_length = episode_length
         self.difficulty = difficulty
@@ -123,7 +125,7 @@ class SimTriFingerCubeEnv(gym.Env):
         robot_id_space = gym.spaces.Box(low=0, high=20, shape=(1,), dtype=np.int_)
 
         # object pose
-        object_obs_space_dict = {
+        object_obs_space_dict: Dict[str, gym.Space] = {
             "position": gym.spaces.Box(
                 low=trifingerpro_limits.object_position.low,
                 high=trifingerpro_limits.object_position.high,
@@ -185,14 +187,18 @@ class SimTriFingerCubeEnv(gym.Env):
             }
         )
 
-        # TODO: Remove this after updating gym
-        self._np_random = None
+        self._old_object_obs: Optional[Dict[str, Any]] = None
+        self.t_obs: int = 0
 
-    def _kernel_reward(self, achieved_goal: dict, desired_goal: dict) -> float:
-        """Compute reward by evaluating a logistic kernel on the pairwise distance of points.
+    def _kernel_reward(
+        self, achieved_goal: np.ndarray, desired_goal: np.ndarray
+    ) -> float:
+        """Compute reward by evaluating a logistic kernel on the pairwise distance of
+        points.
 
         Parameters can be either a 1 dim. array of size 3 (positions) or a two dim.
         array with last dim. of size 3 (keypoints)
+
         Args:
             achieved_goal: Position or keypoints of current pose of the object.
             desired_goal: Position or keypoints of goal pose of the object.
@@ -211,6 +217,7 @@ class SimTriFingerCubeEnv(gym.Env):
         """Append desired action to queue and wait if real time is enabled."""
 
         t = self.platform.append_desired_action(robot_action)
+        # TODO: shouldn't it always sleep if real_time is true?
         if self.visualization and self.real_time:
             sleep(max(0.001 - (time() - self.time_of_last_step), 0.0))
             self.time_of_last_step = time()
@@ -220,11 +227,13 @@ class SimTriFingerCubeEnv(gym.Env):
         self, achieved_goal: dict, desired_goal: dict, info: dict
     ) -> float:
         """Compute the reward for the given achieved and desired goal.
+
         Args:
             achieved_goal: Current pose of the object.
             desired_goal: Goal pose of the object.
             info: An info dictionary containing a field "time_index" which
                 contains the time index of the achieved_goal.
+
         Returns:
             The reward that corresponds to the provided achieved goal w.r.t. to
             the desired goal.
@@ -232,7 +241,8 @@ class SimTriFingerCubeEnv(gym.Env):
 
         if self.reward_type == "dense":
             if self.difficulty == 4:
-                # Use full keypoints if available as only difficulty 4 considers orientation
+                # Use full keypoints if available as only difficulty 4 considers
+                # orientation
                 return self._kernel_reward(
                     achieved_goal["keypoints"], desired_goal["keypoints"]
                 )
@@ -250,11 +260,14 @@ class SimTriFingerCubeEnv(gym.Env):
 
     def has_achieved(self, achieved_goal: dict, desired_goal: dict) -> bool:
         """Determine whether goal pose is achieved."""
+        POSITION_THRESHOLD = 0.02
+        ANGLE_THRESHOLD_DEG = 22.0
 
         desired = desired_goal
         achieved = achieved_goal
         position_diff = np.linalg.norm(desired["position"] - achieved["position"])
-        position_check = position_diff < 0.02
+        # cast from np.bool_ to bool to make mypy happy
+        position_check = bool(position_diff < POSITION_THRESHOLD)
 
         if self.difficulty < 4:
             return position_check
@@ -266,7 +279,8 @@ class SimTriFingerCubeEnv(gym.Env):
             norm = np.linalg.norm([quat_prod.x, quat_prod.y, quat_prod.z])
             norm = min(norm, 1.0)
             angle = 2.0 * np.arcsin(norm)
-            orientation_check = angle < 2.0 * np.pi * 22.0 / 360.0
+            orientation_check = angle < 2.0 * np.pi * ANGLE_THRESHOLD_DEG / 360.0
+
             return position_check and orientation_check
 
     def _check_action(self, action):
@@ -278,16 +292,18 @@ class SimTriFingerCubeEnv(gym.Env):
         self, action: np.ndarray, preappend_actions: bool = True
     ) -> Tuple[dict, float, bool, dict]:
         """Run one timestep of the environment's dynamics.
+
         When end of episode is reached, you are responsible for calling
         ``reset()`` to reset this environment's state.
+
         Args:
             action: An action provided by the agent
             preappend_actions (bool): Whether to already append actions that
                 will be executed during obs-action delay to action queue.
+
         Returns:
             tuple:
-            - observation (dict): agent's observation of the current
-              environment.
+            - observation (dict): agent's observation of the current environment.
             - reward (float): amount of reward returned after previous action.
             - done (bool): whether the episode has ended, in which case further
               step() calls will return undefined results.
@@ -368,22 +384,17 @@ class SimTriFingerCubeEnv(gym.Env):
         else:
             return obs
 
-    def reset_fingers(
-        self,
-        reset_wait_time: int = 3000,
-        return_info: bool = False
-    ):
+    def reset_fingers(self, reset_wait_time: int = 3000, return_info: bool = False):
         """Reset fingers to initial position.
 
         This resets neither the frontend nor the cube. This method is
         supposed to be used for 'soft resets' between episodes in one
-        job."""
-
-        object_positions = []
-        object_orientations = []
+        job.
+        """
+        assert self.platform is not None, "Environment is not initialised."
 
         action = self.platform.Action(position=self._initial_finger_position)
-        for i in range(reset_wait_time):
+        for _ in range(reset_wait_time):
             t = self._append_desired_action(action)
         self.t_obs = t
         # reset step_count even though this is not a full reset
@@ -405,16 +416,14 @@ class SimTriFingerCubeEnv(gym.Env):
                 goal["orientation"], dtype=np.float32
             )
 
-    # TODO: This is a workaround to be compatible with gym 0.18
-    @property
-    def np_random(self) -> np.random.Generator:
-        """Returns the environment's internal :attr:`_np_random` that if not set will initialise with a random seed."""
-        if self._np_random is None:
-            self._np_random = np.random.default_rng()
-        return self._np_random
+        # update goal visualisation
+        if self.visualization:
+            self.goal_marker.set_state(
+                self.active_goal.position, self.active_goal.orientation
+            )
 
     def _get_pose_delay(self, camera_observation, t):
-        """Get delay between when the object pose was caputered and now."""
+        """Get delay between when the object pose was captured and now."""
 
         return t / 1000.0 - camera_observation.cameras[0].timestamp
 
@@ -431,11 +440,13 @@ class SimTriFingerCubeEnv(gym.Env):
         clip_recursively(obs, self.observation_space)
 
     def _create_observation(self, t: int, action: np.ndarray) -> Tuple[dict, dict]:
+        assert self.platform is not None, "Environment is not initialised."
+
         robot_observation = self.platform.get_robot_observation(t)
         camera_observation = self.platform.get_camera_observation(t)
         object_observation = camera_observation.object_pose
 
-        info = {"time_index": t}
+        info: Dict[str, Any] = {"time_index": t}
 
         # object
         object_obs_processed = {
@@ -452,7 +463,7 @@ class SimTriFingerCubeEnv(gym.Env):
                 object_observation
             )
 
-        if hasattr(self, "_old_object_obs"):
+        if self._old_object_obs is not None:
             # handle quaternion flipping
             q_sum = (
                 self._old_object_obs["orientation"]
@@ -517,6 +528,8 @@ class SimTriFingerCubeEnv(gym.Env):
         return observation, info
 
     def _gym_action_to_robot_action(self, gym_action: np.ndarray):
+        assert self.platform is not None, "Environment is not initialised."
+
         # robot action is torque
         robot_action = self.platform.Action(torque=gym_action)
         return robot_action
@@ -527,6 +540,6 @@ class SimTriFingerCubeEnv(gym.Env):
     def reset_cube(self):
         """Replay a recorded trajectory to move cube to center of arena."""
 
-        for position in self._cube_reset_traj[: self._reset_trajectory_length: 2]:
+        for position in self._cube_reset_traj[: self._reset_trajectory_length : 2]:
             robot_action = self.platform.Action(position=position)
             self._append_desired_action(robot_action)

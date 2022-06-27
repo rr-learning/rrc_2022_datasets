@@ -18,19 +18,16 @@ class Evaluation:
         info = initial_info
         n_steps = 0
         momentary_successes = 0
-        ep_return = 0.
-        max_reward = 0.
+        ep_return = 0.0
+        max_reward = 0.0
         transient_success = False
-        if self.time_policy:
-            time1 = time()
-            time_after_obs = time1
+
         while True:
             if self.time_policy:
                 time1 = time()
             action = policy.get_action(obs)
             if self.time_policy:
                 print("policy execution time: ", time() - time1)
-                time1 = time()
             obs, rew, done, info = self.env.step(action)
             ep_return += rew
             max_reward = max(max_reward, rew)
@@ -46,10 +43,10 @@ class Evaluation:
 
         ep_stats = {
             "success_rate": int(info["has_achieved"]),
-            "mean_momentary_success": momentary_successes/n_steps,
+            "mean_momentary_success": momentary_successes / n_steps,
             "transient_success_rate": int(transient_success),
             "return": ep_return,
-            "max_reward": max_reward
+            "max_reward": max_reward,
         }
         return ep_stats
 
@@ -72,7 +69,8 @@ class Evaluation:
                 # retrieve cube from barrier and center it approximately
                 self.env.sim_env.reset_cube()
             # Sample new goal
-            # TODO: Should we use fixed goals here like for the evaluation for the paper?
+            # TODO: Should we use fixed goals here like for the evaluation for the
+            # paper?
             self.env.sim_env.sample_new_goal()
             # move fingers to initial position and wait until cube has settled down
             initial_obs = self.env.reset_fingers(self._reset_time)
