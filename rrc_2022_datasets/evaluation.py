@@ -85,7 +85,7 @@ class Evaluation:
             # move fingers to initial position and wait until cube has settled down
             initial_obs = self.env.reset_fingers(self._reset_time)
 
-        overall_stats = {}
+        overall_stats = {"n_episodes": n_episodes}
         for k in ep_stats_list[0]:
             overall_stats[k] = np.mean([ep_stats[k] for ep_stats in ep_stats_list])
 
