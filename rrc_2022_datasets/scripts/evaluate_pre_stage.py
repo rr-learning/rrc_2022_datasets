@@ -56,7 +56,7 @@ def main():
         "--visualization",
         "-v",
         action="store_true",
-        help="Disable visualization of environment.",
+        help="Enable visualization of environment.",
     )
     parser.add_argument(
         "--n-episodes",
