@@ -68,6 +68,15 @@ Alternatively, the observations can be obtained as nested dictionaries. This sim
 ```
 To transform the observation back to a flat array after filtering, simply set the keyword argument `flatten_obs` to true. Note that the step and reset functions will transform observations in the same manner as the `get_dataset` method to ensure compatibility. A downside of working with observations in the form of dictionaries is that they cause a considerable memory overhead during dataset loading.
 
-### Evaluating a policy
+### Evaluating a policy in simulation
 
-Code that mimics the evaluation on the real robot is provided in `scripts/evaluate_policy_sim.py`. Make sure to replace the policy with your own code and to use the right environment parameters.
+This package installs an executable `rrc2022_evaluate_pre_stage` which can be used to
+evaluate a policy in simulation.  As arguments it expects the task ("push" or "lift")
+and a Python class that implements the policy, following the `PolicyBase` interface:
+
+    rrc2022_evaluate_pre_stage push my_package.MyPolicy
+
+For more options see `--help`.
+
+This tool is also used for the evaluation of submissions in the pre-stage of the
+challenge (hence the name).
