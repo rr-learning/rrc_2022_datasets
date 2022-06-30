@@ -1,6 +1,6 @@
 from copy import deepcopy
 import os
-from typing import Union, Tuple, Dict, Optional, List
+from typing import Union, Tuple, Dict, Optional, List, Any
 import urllib.request
 
 import gym
@@ -124,6 +124,7 @@ class TriFingerDatasetEnv(gym.Env):
         """Keep only a subset of keys in dict.
 
         Applied recursively.
+
         Args:
             keys_to_keep (dict): (Nested) dictionary with values being
                 either a dict or a bolean indicating whether to keep
@@ -169,7 +170,23 @@ class TriFingerDatasetEnv(gym.Env):
             obs = self._scale_obs(obs)
         return obs
 
-    def get_dataset(self, h5path=None, clip=True):
+    def get_dataset(
+        self, h5path: Union[str, os.PathLike] = None, clip: bool = True
+    ) -> Dict[str, Any]:
+        """Get the dataset.
+
+        When called for the first time, the dataset is automatically downloaded and
+        saved to ``~/.rrc_2022_datasets``.
+
+        Args:
+            h5path:  Optional path to a HDF5 file containing the dataset, which will be
+                used instead of the default.
+            clip:  If True, observations are clipped to be within the environment's
+                observation space
+
+        Returns:
+            The dataset.
+        """
         if h5path is None:
             h5path = download_dataset(self.dataset_url, self.name)
 
@@ -229,11 +246,13 @@ class TriFingerDatasetEnv(gym.Env):
         self, achieved_goal: dict, desired_goal: dict, info: dict
     ) -> float:
         """Compute the reward for the given achieved and desired goal.
+
         Args:
             achieved_goal: Current pose of the object.
             desired_goal: Goal pose of the object.
             info: An info dictionary containing a field "time_index" which
                 contains the time index of the achieved_goal.
+
         Returns:
             The reward that corresponds to the provided achieved goal w.r.t. to
             the desired goal.
@@ -243,6 +262,20 @@ class TriFingerDatasetEnv(gym.Env):
     def step(
         self, action: np.ndarray, **kwargs
     ) -> Tuple[Union[Dict, np.ndarray], float, bool, Dict]:
+        """Execute one step.
+
+        Args:
+            action: Array of 9 torque commands, one for each robot joint.
+
+        Returns:
+            A tuple with
+
+            - observation (dict or array): observation of the current environment.
+            - reward (float): amount of reward returned after previous action.
+            - done (bool): whether the episode has ended, in which case further
+              step() calls will return undefined results.
+            - info (dict): info dictionary containing the current time index.
+        """
         if self.real_robot:
             raise NotImplementedError(
                 "The step method is not available for real-robot data."
@@ -255,6 +288,16 @@ class TriFingerDatasetEnv(gym.Env):
     def reset(
         self, return_info: bool = False
     ) -> Union[Union[Dict, np.ndarray], Tuple[Union[Dict, np.ndarray], Dict]]:
+        """Reset the environment.
+
+        Args:
+            return_info:  If true, an "info" dictionary is returned in addition to the
+                observation.
+
+        Returns:
+            If return_info is false: Observation of the initial environment state.
+            If return_info is true: Tuple of observation and info dictionary.
+        """
         if self.real_robot:
             raise NotImplementedError(
                 "The reset method is not available for real-robot data."
@@ -272,9 +315,11 @@ class TriFingerDatasetEnv(gym.Env):
             return processed_obs
 
     def seed(self, seed: Optional[int] = None) -> List[int]:
+        """Set random seed of the environment."""
         return self.sim_env.seed(seed)
 
     def render(self, mode: str = "human"):
+        """Does not do anything for this environment."""
         if self.real_robot:
             raise NotImplementedError(
                 "The render method is not available for real-robot data."
@@ -282,6 +327,12 @@ class TriFingerDatasetEnv(gym.Env):
         self.sim_env.render(mode)
 
     def reset_fingers(self, reset_wait_time: int = 3000, return_info: bool = False):
+        """Moves the fingers to initial position.
+
+        This resets neither the frontend nor the cube. This method is supposed to be
+        used for 'soft resets' between episodes in one job.
+        """
+
         if self.real_robot:
             raise NotImplementedError(
                 "The reset_fingers method is not available for real-robot data."
