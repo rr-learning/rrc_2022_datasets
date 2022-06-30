@@ -70,13 +70,14 @@ To transform the observation back to a flat array after filtering, simply set th
 
 ### Evaluating a policy in simulation
 
-This package installs an executable `rrc2022_evaluate_pre_stage` which can be used to
-evaluate a policy in simulation.  As arguments it expects the task ("push" or "lift")
-and a Python class that implements the policy, following the `PolicyBase` interface:
+This package contains an executable module `rrc_2022_datasets.evaluate_pre_stage`, which
+can be used to evaluate a policy in simulation.  As arguments it expects the task
+("push" or "lift") and a Python class that implements the policy, following the
+`PolicyBase` interface:
 
-    rrc2022_evaluate_pre_stage push my_package.MyPolicy
+    python3 -m rrc_2022_datasets.evaluate_pre_stage push my_package.MyPolicy
 
 For more options see `--help`.
 
-This tool is also used for the evaluation of submissions in the pre-stage of the
-challenge (hence the name).
+This is also used for the evaluation of submissions in the pre-stage of the challenge
+(hence the name).
