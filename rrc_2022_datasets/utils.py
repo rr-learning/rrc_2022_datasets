@@ -1,4 +1,4 @@
-"""Utils related to quaternions."""
+"""Utility methods for working with object poses and keypoints."""
 
 import numpy as np
 import quaternion
@@ -17,7 +17,15 @@ def to_world_space(x_local, pose):
 
 
 def get_keypoints_from_pose(pose, num_keypoints=8, dimensions=(0.065, 0.065, 0.065)):
+    """Calculate keypoints (coordinates of the corners of the cube) from pose.
 
+    Args:
+        pose: Object pose containing position and orientation of cube.
+        num_keypoints: Number of keypoints to generate.
+        dimensions: Dimensions of the cube.
+    Returns:
+        Array containing the keypoints.
+    """
     keypoints = []
     for i in range(num_keypoints):
         # convert to binary representation
@@ -34,6 +42,15 @@ def get_keypoints_from_pose(pose, num_keypoints=8, dimensions=(0.065, 0.065, 0.0
 
 
 def get_pose_from_keypoints(keypoints, dimensions=(0.065, 0.065, 0.065)):
+    """Calculate pose (position, orientation) from keypoints.
+
+    Args:
+        keypoints: At least three keypoints representing the pose.
+        dimensions: Dimensions of the cube.
+    Returns:
+        Tuple containing the coordinates of the cube center and a
+        quaternion representing the orientation.
+    """
     center = np.mean(keypoints, axis=0)
     kp_centered = np.array(keypoints) - center
     kp_scaled = kp_centered / np.array(dimensions) * 2.0
