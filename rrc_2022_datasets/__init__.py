@@ -30,7 +30,7 @@ dataset_params = [
     {
         "name": "trifinger-cube-lift-sim-expert-v0",
         "dataset_url": (
-            "https://nextcloud.tuebingen.mpg.de/index.php/s/gjtikkDnQjmRAKg/download"
+            "https://nextcloud.tuebingen.mpg.de/index.php/s/fW2sqpBwnBzsjXY/download"
         ),
         "ref_min_score": 0.0,
         "ref_max_score": 1.0 * 30000 / 20,
