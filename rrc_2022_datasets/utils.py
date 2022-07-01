@@ -9,6 +9,14 @@ def to_quat(x):
 
 
 def to_world_space(x_local, pose):
+    """Transform point from local object coordinate system to world space.
+
+    Args:
+        x_local: Coordinates of point in local frame.
+        pose: Object pose containing position and orientation.
+    Returns:
+        The coordinates in world space.
+    """
     q_rot = to_quat(pose.orientation)
     transl = pose.position
     q_local = np.quaternion(0.0, x_local[0], x_local[1], x_local[2])
