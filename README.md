@@ -2,7 +2,7 @@
 
 This repository provides offline reinforcement learning datasets collected on the TriFinger platform (simulated or real). It follows the interface suggested by [D4RL](https://github.com/rail-berkeley/d4rl). 
 
-The datasets are used for the [Real Robot Challenge 2022](https://real-robot-challenge.com).
+The datasets are used for the [Real Robot Challenge 2022](https://real-robot-challenge.com).  See also the [RRC 2022 Software Documentation](https://webdav.tuebingen.mpg.de/real-robot-challenge/2022/docs/).
 
 ## Installation
 
