@@ -217,7 +217,8 @@ class SimTriFingerCubeEnv(gym.Env):
         """Append desired action to queue and wait if real time is enabled."""
 
         t = self.platform.append_desired_action(robot_action)
-        if self.real_time:
+        # TODO: shouldn't it always sleep if real_time is true?
+        if self.visualization and self.real_time:
             sleep(max(0.001 - (time() - self.time_of_last_step), 0.0))
             self.time_of_last_step = time()
         return t
