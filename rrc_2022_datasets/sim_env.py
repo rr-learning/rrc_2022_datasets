@@ -1,5 +1,6 @@
 from time import sleep, time
 from typing import Tuple, Dict, Any, Optional
+import logging
 import os
 
 import gym
@@ -56,6 +57,8 @@ class SimTriFingerCubeEnv(gym.Env):
         """
         # Basic initialization
         # ====================
+
+        self.logger = logging.getLogger("rrc_2022_datasets.SimTriFingerCubeEnv")
 
         assert (
             obs_action_delay < self._step_size
@@ -190,6 +193,10 @@ class SimTriFingerCubeEnv(gym.Env):
         self._old_object_obs: Optional[Dict[str, Any]] = None
         self.t_obs: int = 0
 
+        # Count consecutive steps where timing is violated (to decide when the show a
+        # warning)
+        self._timing_violation_counter = 0
+
     def _kernel_reward(
         self, achieved_goal: np.ndarray, desired_goal: np.ndarray
     ) -> float:
@@ -317,8 +324,37 @@ class SimTriFingerCubeEnv(gym.Env):
         # get robot action
         robot_action = self._gym_action_to_robot_action(action)
 
-        # send new action to robot until new observation
-        # is to be provided
+        # check timing and show a warning/error if delayed
+        # do not check in first iteration as no time index is available yet (would lead
+        # to dead-lock)
+        if self.t_obs > 0:
+            t_now = self.platform.get_current_timeindex()
+            t_expected = self.t_obs + self.obs_action_delay
+            if t_now > t_expected:
+                self._timing_violation_counter += 1
+                extreme = t_now > self.t_obs + self._step_size
+
+                if extreme or self._timing_violation_counter >= 3:
+                    delay = t_now - t_expected
+                    self.logger.warning(
+                        f"Control loop got delayed by {delay} ms."
+                        " The action will be applied for a shorter time to catch up."
+                        " Please check if your policy is fast enough (max. computation"
+                        f" time should be <{1 + self.obs_action_delay} ms)."
+                    )
+
+                if extreme:
+                    self.logger.error(
+                        "ERROR: Control loop got delayed by more than a full step."
+                        "  Timing of the episode will be affected!"
+                    )
+            else:
+                self._timing_violation_counter = 0
+
+        # send new action to robot until new observation is to be provided
+        # Note that by initially setting t the way it is, it is ensured that the loop
+        # always runs at least one iteration, even if the actual time step is already
+        # ahead by more than one step size.
         t = self.t_obs + self.obs_action_delay
         while t < self.t_obs + self._step_size:
             self.step_count += 1
