@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+## [1.1.1] - 2022-09-06
 ### Added
 - Print warnings if the step-function of SimTriFingerCubeEnv is called at a too low
   rate.  This way the users get some indication if their policy is taking too much time.
@@ -34,7 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 First release
 
 
-[Unreleased]: https://github.com/rr-learning/rrc_2022_datasets/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/rr-learning/rrc_2022_datasets/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/rr-learning/rrc_2022_datasets/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/rr-learning/rrc_2022_datasets/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/rr-learning/rrc_2022_datasets/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/rr-learning/rrc_2022_datasets/releases/tag/v1.0.0
