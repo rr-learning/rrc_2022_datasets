@@ -321,6 +321,8 @@ class SimTriFingerCubeEnv(gym.Env):
         if not self._check_action(action):
             raise ValueError("Given action is not contained in the action space.")
 
+        self.step_count += 1
+
         # get robot action
         robot_action = self._gym_action_to_robot_action(action)
 
@@ -346,7 +348,7 @@ class SimTriFingerCubeEnv(gym.Env):
                 if extreme:
                     self.logger.error(
                         "ERROR: Control loop got delayed by more than a full step."
-                        "  Timing of the episode will be affected!"
+                        "  Timing of the episode will be significantly affected!"
                     )
             else:
                 self._timing_violation_counter = 0
@@ -357,7 +359,6 @@ class SimTriFingerCubeEnv(gym.Env):
         # ahead by more than one step size.
         t = self.t_obs + self.obs_action_delay
         while t < self.t_obs + self._step_size:
-            self.step_count += 1
             t = self._append_desired_action(robot_action)
         # time of the new observation
         self.t_obs = t
