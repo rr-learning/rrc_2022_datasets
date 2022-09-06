@@ -283,7 +283,7 @@ class SimTriFingerCubeEnv(gym.Env):
             b_conj = b.conjugate()
             quat_prod = a * b_conj
             norm = np.linalg.norm([quat_prod.x, quat_prod.y, quat_prod.z])
-            norm = min(norm, 1.0)
+            norm = min(norm, 1.0)  # type: ignore
             angle = 2.0 * np.arcsin(norm)
             orientation_check = angle < 2.0 * np.pi * ANGLE_THRESHOLD_DEG / 360.0
 
@@ -366,19 +366,20 @@ class SimTriFingerCubeEnv(gym.Env):
         reward = self.compute_reward(
             observation["achieved_goal"], observation["desired_goal"], info
         )
-        is_done = self.step_count >= self.episode_length * self._step_size
+        is_done = self.step_count >= self.episode_length
 
         if not is_done and preappend_actions:
             # Append action to action queue of robot for as many time
             # steps as the obs_action_delay dictates. This gives the
             # user time to evaluate the policy.
             for _ in range(self.obs_action_delay):
-                self.step_count += 1
                 self._append_desired_action(robot_action)
 
         return observation, reward, is_done, info
 
-    def reset(self, return_info: bool = False, preappend_actions: bool = True):
+    def reset(  # type: ignore
+        self, return_info: bool = False, preappend_actions: bool = True
+    ):
         """Reset the environment."""
 
         super().reset(return_info=return_info)
