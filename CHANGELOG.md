@@ -7,8 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Added
+- Print warnings if the step-function of SimTriFingerCubeEnv is called at a too low
+  rate.  This way the users get some indication if their policy is taking too much time.
+
+### Fixed
+- Count environment steps instead of robot steps to determine end of the episode.  This
+  fixes an issue that calling step() at a too low rate could cause in too many
+  environment steps to be executed.
+
 
 ## [1.1.0] - 2022-08-02
+### Added
 - Add datasets for the real-robot stage
 
 ## [1.0.1] - 2022-07-04
