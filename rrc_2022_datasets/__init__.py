@@ -47,7 +47,10 @@ dataset_params = [
     # real-robot stage/pushing expert
     {
         "name": "trifinger-cube-push-real-expert-v0",
-        "dataset_url": "http://robots.real-robot-challenge.com/public/rrc2022/datasets/trifinger-cube-push-real-expert-v0.hdf5",
+        "dataset_url": (
+            "http://robots.real-robot-challenge.com/public/rrc2022/datasets/"
+            "trifinger-cube-push-real-expert-v0.hdf5"
+        ),
         "ref_min_score": 0.0,
         "ref_max_score": 1.0 * 15000 / 20,
         "real_robot": True,
@@ -61,7 +64,10 @@ dataset_params = [
     # real-robot stage/pushing mixed
     {
         "name": "trifinger-cube-push-real-mixed-v0",
-        "dataset_url": "http://robots.real-robot-challenge.com/public/rrc2022/datasets/trifinger-cube-push-real-mixed-v0.hdf5",
+        "dataset_url": (
+            "http://robots.real-robot-challenge.com/public/rrc2022/datasets/"
+            "trifinger-cube-push-real-mixed-v0.hdf5"
+        ),
         "ref_min_score": 0.0,
         "ref_max_score": 1.0 * 15000 / 20,
         "real_robot": True,
@@ -75,7 +81,10 @@ dataset_params = [
     # real-robot stage/lifting expert
     {
         "name": "trifinger-cube-lift-real-expert-v0",
-        "dataset_url": "http://robots.real-robot-challenge.com/public/rrc2022/datasets/trifinger-cube-lift-real-expert-v0.hdf5",
+        "dataset_url": (
+            "http://robots.real-robot-challenge.com/public/rrc2022/datasets/"
+            "trifinger-cube-lift-real-expert-v0.hdf5"
+        ),
         "ref_min_score": 0.0,
         "ref_max_score": 1.0 * 30000 / 20,
         "real_robot": True,
@@ -89,7 +98,10 @@ dataset_params = [
     # real-robot stage/lifting mixed
     {
         "name": "trifinger-cube-lift-real-mixed-v0",
-        "dataset_url": "http://robots.real-robot-challenge.com/public/rrc2022/datasets/trifinger-cube-lift-real-mixed-v0.hdf5",
+        "dataset_url": (
+            "http://robots.real-robot-challenge.com/public/rrc2022/datasets/"
+            "trifinger-cube-lift-real-mixed-v0.hdf5"
+        ),
         "ref_min_score": 0.0,
         "ref_max_score": 1.0 * 30000 / 20,
         "real_robot": True,
