@@ -1,5 +1,6 @@
 from time import sleep, time
 from typing import Tuple, Dict, Any, Optional
+import logging
 import os
 
 import gym
@@ -56,6 +57,8 @@ class SimTriFingerCubeEnv(gym.Env):
         """
         # Basic initialization
         # ====================
+
+        self.logger = logging.getLogger("rrc_2022_datasets.SimTriFingerCubeEnv")
 
         assert (
             obs_action_delay < self._step_size
@@ -190,6 +193,10 @@ class SimTriFingerCubeEnv(gym.Env):
         self._old_object_obs: Optional[Dict[str, Any]] = None
         self.t_obs: int = 0
 
+        # Count consecutive steps where timing is violated (to decide when the show a
+        # warning)
+        self._timing_violation_counter = 0
+
     def _kernel_reward(
         self, achieved_goal: np.ndarray, desired_goal: np.ndarray
     ) -> float:
@@ -276,7 +283,7 @@ class SimTriFingerCubeEnv(gym.Env):
             b_conj = b.conjugate()
             quat_prod = a * b_conj
             norm = np.linalg.norm([quat_prod.x, quat_prod.y, quat_prod.z])
-            norm = min(norm, 1.0)
+            norm = min(norm, 1.0)  # type: ignore
             angle = 2.0 * np.arcsin(norm)
             orientation_check = angle < 2.0 * np.pi * ANGLE_THRESHOLD_DEG / 360.0
 
@@ -314,14 +321,44 @@ class SimTriFingerCubeEnv(gym.Env):
         if not self._check_action(action):
             raise ValueError("Given action is not contained in the action space.")
 
+        self.step_count += 1
+
         # get robot action
         robot_action = self._gym_action_to_robot_action(action)
 
-        # send new action to robot until new observation
-        # is to be provided
+        # check timing and show a warning/error if delayed
+        # do not check in first iteration as no time index is available yet (would lead
+        # to dead-lock)
+        if self.t_obs > 0:
+            t_now = self.platform.get_current_timeindex()
+            t_expected = self.t_obs + self.obs_action_delay
+            if t_now > t_expected:
+                self._timing_violation_counter += 1
+                extreme = t_now > self.t_obs + self._step_size
+
+                if extreme or self._timing_violation_counter >= 3:
+                    delay = t_now - t_expected
+                    self.logger.warning(
+                        f"Control loop got delayed by {delay} ms."
+                        " The action will be applied for a shorter time to catch up."
+                        " Please check if your policy is fast enough (max. computation"
+                        f" time should be <{1 + self.obs_action_delay} ms)."
+                    )
+
+                if extreme:
+                    self.logger.error(
+                        "ERROR: Control loop got delayed by more than a full step."
+                        "  Timing of the episode will be significantly affected!"
+                    )
+            else:
+                self._timing_violation_counter = 0
+
+        # send new action to robot until new observation is to be provided
+        # Note that by initially setting t the way it is, it is ensured that the loop
+        # always runs at least one iteration, even if the actual time step is already
+        # ahead by more than one step size.
         t = self.t_obs + self.obs_action_delay
         while t < self.t_obs + self._step_size:
-            self.step_count += 1
             t = self._append_desired_action(robot_action)
         # time of the new observation
         self.t_obs = t
@@ -330,19 +367,20 @@ class SimTriFingerCubeEnv(gym.Env):
         reward = self.compute_reward(
             observation["achieved_goal"], observation["desired_goal"], info
         )
-        is_done = self.step_count >= self.episode_length * self._step_size
+        is_done = self.step_count >= self.episode_length
 
         if not is_done and preappend_actions:
             # Append action to action queue of robot for as many time
             # steps as the obs_action_delay dictates. This gives the
             # user time to evaluate the policy.
             for _ in range(self.obs_action_delay):
-                self.step_count += 1
                 self._append_desired_action(robot_action)
 
         return observation, reward, is_done, info
 
-    def reset(self, return_info: bool = False, preappend_actions: bool = True):
+    def reset(  # type: ignore
+        self, return_info: bool = False, preappend_actions: bool = True
+    ):
         """Reset the environment."""
 
         super().reset(return_info=return_info)
